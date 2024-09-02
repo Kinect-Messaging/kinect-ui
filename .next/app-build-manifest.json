@@ -1,10 +1,10 @@
 {
   "pages": {
-    "/admin/messages/page": [
+    "/admin/journeys/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/admin/messages/page.css",
-      "static/chunks/app/admin/messages/page.js"
+      "static/css/app/admin/journeys/page.css",
+      "static/chunks/app/admin/journeys/page.js"
     ],
     "/admin/layout": [
       "static/chunks/webpack.js",

@@ -25,9 +25,9 @@ function JourneyTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', {
+                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
                     headers: {
-                        'Ocp-Apim-Subscription-Key': process.env.REACT_APP_AZURE_SUBSCRIPTION_KEY,
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
                         'X-Transaction-Id': uuidv4()
                     }
                 });

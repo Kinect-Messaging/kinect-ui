@@ -4,22 +4,27 @@ import { DataEditor, GridColumn, GridCell, GridCellKind } from "@glideapps/glide
 import Card from 'components/card';
 import { v4 as uuidv4 } from 'uuid';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
-type JourneyData = {
-    journeyId: string;
-    journeyName: string;
-    journeySteps: { seqId: number; eventName: string; stepCondition: string; messageConfigs: { [key: string]: string }; }[] | null;
-    auditInfo: { createdBy: string; createdTime: string; updatedBy: string; updatedTime: string };
+type ChangeLog = {
+    user: string;
+    time: string;
+    comment: string;
 };
 
-function JourneyTable() {
-    const [data, setData] = useState<JourneyData[]>([]);
-    const [selectedRow, setSelectedRow] = useState<JourneyData | null>(null);
+type EnvData = {
+    envId: string;
+    envName: string;
+    journeyId: string;
+    messageId: string;
+    eventName: string;
+    changeLog: ChangeLog[];
+};
+
+function EnvTable() {
+    const [data, setData] = useState<EnvData[]>([]);
+    const [selectedRow, setSelectedRow] = useState<EnvData | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedData, setEditedData] = useState<JourneyData | null>(null);
+    const [editedData, setEditedData] = useState<EnvData | null>(null);
 
     // Fetch data from the API
     useEffect(() => {
@@ -27,21 +32,21 @@ function JourneyTable() {
             try {
                 const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/env', {
                     headers: {
-                        'Ocp-Apim-Subscription-Key': process.env.REACT_APP_AZURE_SUBSCRIPTION_KEY,
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
                         'X-Transaction-Id': uuidv4()
                     }
                 });
-                const result: JourneyData[] = await response.json();
+                const result: EnvData[] = await response.json();
                 setData(result);
-                console.log(result)
+                console.log(result);
             } catch (error) {
-                console.error("Error fetching journey data:", error);
+                console.error("Error fetching environment data:", error);
             }
         };
         fetchData();
     }, []);
 
-    const openModal = (row: JourneyData) => {
+    const openModal = (row: EnvData) => {
         setSelectedRow(row);
         setEditedData(row);
         setIsModalOpen(true);
@@ -67,7 +72,7 @@ function JourneyTable() {
         closeModal();
     };
 
-    const handleInputChange = (field: keyof JourneyData, value: string) => {
+    const handleInputChange = (field: keyof EnvData, value: string) => {
         if (editedData) {
             setEditedData(prevData => ({
                 ...prevData!,
@@ -77,9 +82,10 @@ function JourneyTable() {
     };
 
     const columns: GridColumn[] = [
-        { title: "Journey Name", id: "journeyName" },
-        { title: "Journey Step Length", id: "journeyStepLength" },
-        { title: "Created Time", id: "createdTime" },
+        { title: "Environment Name", id: "envName" },
+        { title: "Journey ID", id: "journeyId" },
+        { title: "Message ID", id: "messageId" },
+        { title: "Event Name", id: "eventName" },
         { title: "View", id: "view" }
     ];
 
@@ -108,36 +114,15 @@ function JourneyTable() {
             };
         }
 
-        // Handle the "Journey Step Length" column
-        if (columnId === "journeyStepLength") {
-            const length = dataRow.journeySteps ? dataRow.journeySteps.length.toString() : "0";
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: length,
-                data: length,
-            };
-        }
+        // Safely access the data for other columns
+        const cellData = (dataRow as any)[columnId];
 
-        // Handle the "Created Time" column
-        if (columnId === "createdTime") {
-            const createdTime = new Date(dataRow.auditInfo.createdTime).toLocaleString();
+        if (typeof cellData === "string") {
             return {
                 kind: GridCellKind.Text,
                 allowOverlay: false,
-                displayData: createdTime,
-                data: createdTime,
-            };
-        }
-
-        // Safely access the data for the "Journey Name" column
-        if (columnId === "journeyName") {
-            const journeyName = dataRow.journeyName || "Unnamed Journey";
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: journeyName,
-                data: journeyName,
+                displayData: cellData,
+                data: cellData,
             };
         }
 
@@ -161,7 +146,7 @@ function JourneyTable() {
             <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
                 <header className="relative flex items-center justify-between pt-4">
                     <div className="text-xl font-bold text-navy-700 dark:text-white">
-                        Journeys Data Grid
+                        Environments Data Grid
                     </div>
                 </header>
 
@@ -181,20 +166,46 @@ function JourneyTable() {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-full h-full">
-                        <h2 className="text-xl font-bold mb-4">{isEditing ? "Edit Journey Details" : "View Journey Details"}</h2>
+                        <h2 className="text-xl font-bold mb-4">{isEditing ? "Edit Environment Details" : "View Environment Details"}</h2>
                         {selectedRow && (
                             <div>
                                 <div>
-                                    <label><strong>Journey Name:</strong></label>
+                                    <label><strong>Environment Name:</strong></label>
                                     {isEditing ? (
                                         <input
                                             type="text"
-                                            value={editedData?.journeyName}
-                                            onChange={(e) => handleInputChange('journeyName', e.target.value)}
+                                            value={editedData?.envName}
+                                            onChange={(e) => handleInputChange('envName', e.target.value)}
                                             className="w-full border rounded p-2"
                                         />
                                     ) : (
-                                        <p>{selectedRow.journeyName}</p>
+                                        <p>{selectedRow.envName}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label><strong>Journey ID:</strong></label>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={editedData?.journeyId}
+                                            onChange={(e) => handleInputChange('journeyId', e.target.value)}
+                                            className="w-full border rounded p-2"
+                                        />
+                                    ) : (
+                                        <p>{selectedRow.journeyId}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label><strong>Message ID:</strong></label>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={editedData?.messageId}
+                                            onChange={(e) => handleInputChange('messageId', e.target.value)}
+                                            className="w-full border rounded p-2"
+                                        />
+                                    ) : (
+                                        <p>{selectedRow.messageId}</p>
                                     )}
                                 </div>
                                 <div>
@@ -202,38 +213,12 @@ function JourneyTable() {
                                     {isEditing ? (
                                         <input
                                             type="text"
-                                            value={editedData?.journeySteps?.[0]?.eventName || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
+                                            value={editedData?.eventName}
+                                            onChange={(e) => handleInputChange('eventName', e.target.value)}
                                             className="w-full border rounded p-2"
                                         />
                                     ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.eventName || "N/A"}</p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label><strong>Message Config 1:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeySteps?.[0]?.messageConfigs["1"] || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
-                                            className="w-full border rounded p-2"
-                                        />
-                                    ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.messageConfigs["1"] || "N/A"}</p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label><strong>Message Config 2:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeySteps?.[0]?.messageConfigs["2"] || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
-                                            className="w-full border rounded p-2"
-                                        />
-                                    ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.messageConfigs["2"] || "N/A"}</p>
+                                        <p>{selectedRow.eventName}</p>
                                     )}
                                 </div>
                             </div>
@@ -268,4 +253,4 @@ function JourneyTable() {
     );
 }
 
-export default JourneyTable;
+export default EnvTable;
