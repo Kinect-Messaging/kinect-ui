@@ -141,7 +141,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az containerapp update -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg --registry-server ghcr.io --registry-username ${{ github.actor }} --registry-password ${{ secrets.KINECTCONFIG_REGISTRY_PASSWORD }} -i ${{ needs.build.outputs.docker-tag }} --ingress external --target-port 3000 --environment development
+            az containerapp update -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg -i ${{ needs.build.outputs.docker-tag }} --cpu 0.5 --memory 1.0Gi --min-replicas 0 --max-replicas 2
 
 #      - name: Deploy to Dev Container App
 #        uses: azure/container-apps-deploy-action@v2
