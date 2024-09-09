@@ -141,7 +141,6 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-#            az containerapp revision list -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg
             az containerapp up -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg --registry-server ghcr.io --registry-username ${{ github.actor }} --registry-password ${{ secrets.KINECTCONFIG_REGISTRY_PASSWORD }} --source . --target-port 3000
 
 #      - name: Deploy to Dev Container App
