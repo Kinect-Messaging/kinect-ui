@@ -1,0 +1,40 @@
+{
+  "properties": {
+    "environmentId": "/subscriptions/ecb53e45-9f84-4736-b61b-88492ae0204f/resourceGroups/dev-apps-rg/providers/Microsoft.App/managedEnvironments/development",
+    "configuration": {
+      "activeRevisionsMode": "single",
+      "ingress": {
+        "external": true,
+        "targetPort": 3000,
+        "traffic": [
+          {
+            "weight": 100,
+            "revisionName": "kinect-messaging-1",
+            "label": "development"
+          }
+        ],
+        "stickySessions": {
+          "affinity": "sticky"
+        },
+        "clientCertificateMode": "accept"
+      },
+      "maxInactiveRevisions": 10
+    },
+    "template": {
+      "containers": [
+        {
+          "image": "ghcr.io/kinect-messaging/kinect-ui:main",
+          "name": "kinect-messaging",
+          "resources": {
+            "cpu": 0.5,
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "scale": {
+        "minReplicas": 0,
+        "maxReplicas": 3
+      }
+    }
+  }
+}
