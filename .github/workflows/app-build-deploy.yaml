@@ -141,7 +141,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az containerapp create -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg --registry-server ghcr.io --registry-username ${{ github.actor }} --registry-password ${{ secrets.KINECTCONFIG_REGISTRY_PASSWORD }} -i ${{ needs.build.outputs.docker-tag }} --ingress external --target-port 3000
+            az containerapp create -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg --registry-server ghcr.io --registry-username ${{ github.actor }} --registry-password ${{ secrets.KINECTCONFIG_REGISTRY_PASSWORD }} -i ${{ needs.build.outputs.docker-tag }} --ingress external --target-port 3000 --environment development
 
 #      - name: Deploy to Dev Container App
 #        uses: azure/container-apps-deploy-action@v2
