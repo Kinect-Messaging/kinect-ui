@@ -168,7 +168,7 @@ jobs:
           resourceGroupName: ${{ vars.RESOURCE_GROUP }}
           region: ${{ vars.LOCATION }}
           template: ./deploy/main.bicep
-          parameters: ./deploy/main.parameters.json
+          parameters: ./deploy/main.parameters.json containerAppsEnvironmentId=${{ secrets.CONTAINERAPPS_ENV_ID }} containerImage=${{ needs.build.outputs.docker-tag }} containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
           deploymentMode: Validate
 
   # This job run what-if on the bicep template
