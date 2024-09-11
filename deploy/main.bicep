@@ -33,6 +33,19 @@ param containerRegistryPassword string
 @description('The image for the service.')
 param containerImage string
 
+@description('The CPU allocation for the service.')
+param cpu string
+
+@description('The Memory allocation for the service.')
+param memory string
+
+@description('The minimum instance for the service.')
+param minInstance int
+
+@description('The maximum instance for the service.')
+param maxInstance int
+
+
 //@secure()
 //@description('The Application Insights Instrumentation.')
 //param appInsightsInstrumentationKey string
@@ -92,8 +105,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: containerName
           image: containerImage
           resources: {
-            cpu: json('0.25')
-            memory: '0.5Gi'
+            cpu: json(cpu)
+            memory: memory
           }
           env: [
 //            {
@@ -104,8 +117,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 1
-        maxReplicas: 1
+        minReplicas: minInstance
+        maxReplicas: maxInstance
       }
     }
   }

@@ -25,6 +25,18 @@
     },
     "portNumber": {
       "value": 3000
+    },
+    "cpu": {
+      "value": "0.25"
+    },
+    "memory": {
+      "value": "0.5Gi"
+    },
+    "minInstance": {
+      "value": 1
+    },
+    "maxInstance": {
+      "value": 1
     }
   }
 }
