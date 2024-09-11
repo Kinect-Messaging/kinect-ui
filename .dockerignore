@@ -1,4 +1,4 @@
-Dockerfile
+deploy/Dockerfile
 .dockerignore
 
 # Not needed as we are bundling the whole app
