@@ -133,7 +133,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     name: Create RG and Validate bicep template
-    needs: [ lint ]
+    needs: [ build, lint ]
     environment:
       name: dev
     permissions:
@@ -174,7 +174,7 @@ jobs:
   # This job run what-if on the bicep template
   preview:
     runs-on: ubuntu-latest
-    needs: [ validate ]
+    needs: [ build, validate ]
     name: Run what-if on the bicep template
     environment:
       name: dev
@@ -201,7 +201,7 @@ jobs:
   # This job deploys the bicep template to Azure subscription using GitHub Container Registry images
   deploy-with-ghcr-images:
     runs-on: ubuntu-latest
-    needs: [ preview ]
+    needs: [ build, preview ]
     name: Deploy to Azure subscription with GHCR
     environment:
       name: dev
