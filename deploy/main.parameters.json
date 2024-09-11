@@ -15,7 +15,7 @@
       "value": "ghcr.io"
     },
     "containerRegistryUsername": {
-      "value": "raj-work"
+      "value": "github-user"
     },
     "containerRegistryPassword": {
       "value": ""

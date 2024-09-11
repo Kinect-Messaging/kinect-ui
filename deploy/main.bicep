@@ -23,6 +23,7 @@ param containerRegistryName string
 //@description('The resource ID of the user assigned managed identity for the container registry to be able to pull images from it.')
 //param containerRegistryUserAssignedIdentityId string
 
+@secure()
 @description('The username for the container registry to be able to pull images from it.')
 param containerRegistryUsername string
 
