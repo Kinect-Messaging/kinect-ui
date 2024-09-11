@@ -1,4 +1,3 @@
-
 name: Build & Deploy App
 on:
   workflow_dispatch:
@@ -8,12 +7,16 @@ on:
       - 'src/**'
       - 'Dockerfile'
       - '.github/workflows/app-build-deploy.yaml'
+      - 'deploy/main.bicep'
+      - 'deploy/main.parameters.bicep'
   push:
     branches: [ main ]
     paths:
       - 'src/**'
       - 'Dockerfile'
       - '.github/workflows/app-build-deploy.yaml'
+      - 'deploy/main.bicep'
+      - 'deploy/main.parameters.bicep'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,7 +33,7 @@ jobs:
       REGISTRY: ghcr.io
       APP_NAME: kinect-ui
     outputs:
-      docker-tag:  ${{ steps.meta.outputs.tags }}
+      docker-tag: ${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
 
@@ -113,52 +116,99 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
 
+  # This job is used for linting the bicep files
+  lint:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    name: Lint bicep files
+    steps:
+      - uses: actions/checkout@v4
+      - name: Perform linting
+        run: az bicep build --f deploy/main.bicep
+
+  # This job creates the resource group if it does not exist and validates the bicep template
+  validate:
+    runs-on: ubuntu-latest
+    name: Create RG and Validate bicep template
+    needs: [ lint ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group if does not exist
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            if [[ $(az group exists -n ${{ vars.RESOURCE_GROUP }}) == true ]]
+            then
+              echo "Resource group already exists in the subscription"
+            else
+              az group create  --name ${{ vars.RESOURCE_GROUP }} --location ${{ vars.LOCATION }}
+              echo "Resource group created"
+            fi
+
+      - uses: azure/arm-deploy@v1
+        name: Run validation
+        with:
+          deploymentName: ${{ github.run_number }}
+          resourceGroupName: ${{ vars.RESOURCE_GROUP }}
+          region: ${{ vars.LOCATION }}
+          template: ./deploy/main.bicep
+          parameters: ./deploy/main.parameters.json
+          deploymentMode: Validate
+
+  # This job run what-if on the bicep template
+  preview:
+    runs-on: ubuntu-latest
+    needs: [ validate ]
+    name: Run what-if on the bicep template
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v1
+        name: Sign in to Azure
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/arm-deploy@v1
+        name: Run what-if
+        with:
+          resourceGroupName: ${{ vars.RESOURCE_GROUP }}
+          template: ./deploy/main.bicep
+          parameters: ./deploy/main.parameters.json containerAppsEnvironmentId=${{ secrets.CONTAINERAPPS_ENV_ID }} containerImage=${{ needs.build.outputs.docker-tag }} containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
+          additionalArguments: "--what-if --rollback-on-error --what-if-exclude-change-types  Ignore"
+
+  # This job deploys the bicep template to Azure subscription using GitHub Container Registry images
+  deploy-with-ghcr-images:
+    runs-on: ubuntu-latest
+    needs: [ preview ]
+    name: Deploy to Azure subscription with GHCR
     env:
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5' #Specify timeout in minutes. Default is 10 minutes.
       # Use docker.io for Docker Hub if empty
       REGISTRY: ghcr.io
       CONTAINER_NAME: kinect-messaging
     steps:
-      # Login to Azure
-      - name: Azure login
-        uses: azure/login@v2
+      - uses: actions/checkout@v4
+      - uses: azure/login@v1
+        name: Sign in to Azure
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Deploy ARM template
-      - name: Run ARM deploy
-        uses: azure/arm-deploy@v1
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/arm-deploy@v1
+        id: deployment-with-ghcr-images
+        name: Deploy to Azure subscription
         with:
-          resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./deploy/containerapp-arm.json
-#          parameters: storageAccountType=Standard_LRS
-
-#      # Deploy using AZ CLI
-#      - name: Azure CLI script
-#        uses: azure/cli@v2
-#        with:
-#          azcliversion: latest
-#          inlineScript: |
-#            az containerapp update -n ${{ env.CONTAINER_NAME }} -g dev-apps-rg -i ${{ needs.build.outputs.docker-tag }} --cpu 0.5 --memory 1.0Gi --min-replicas 0 --max-replicas 2
-
-#      - name: Deploy to Dev Container App
-#        uses: azure/container-apps-deploy-action@v2
-#        with:
-#          registryUrl: ${{ env.REGISTRY }}
-#          registryUsername: ${{ github.actor }}
-#          registryPassword: ${{ secrets.KINECTCONFIG_REGISTRY_PASSWORD }}
-#          imageToDeploy: ${{ needs.build.outputs.docker-tag }}
-#          containerAppName: ${{ env.CONTAINER_NAME }}
-#          resourceGroup: dev-apps-rg
-#          containerAppEnvironment: development
-#          targetPort: 3000
+          deploymentName: ${{ env.CONTAINER_NAME }}
+          resourceGroupName: ${{ vars.RESOURCE_GROUP }}
+          region: ${{ vars.LOCATION }}
+          template: ./deploy/main.bicep
+          parameters: ./deploy/main.parameters.json containerAppsEnvironmentId=${{ secrets.CONTAINERAPPS_ENV_ID }} containerImage=${{ needs.build.outputs.docker-tag }} containerRegistryPassword=${{ secrets.REGISTRY_PASSWORD }}
+          failOnStdErr: false
