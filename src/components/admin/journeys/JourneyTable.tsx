@@ -101,81 +101,81 @@
 //         };
 //     }, [data]);
 
-//     const handleCellClick = (cell: [number, number]) => {
-//         const [col, row] = cell;
-//         if (columns[col].id === "view") {
-//             openModal(data[row]);
-//         }
-//     };
+// const handleCellClick = (cell: [number, number]) => {
+//     const [col, row] = cell;
+//     if (columns[col].id === "view") {
+//         openModal(data[row]);
+//     }
+// };
 
 //     return (
-//         <div>
-//             <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
-//                 <header className="relative flex items-center justify-between pt-4">
-//                     <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
-//                 </header>
+// <div>
+//     <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
+//         <header className="relative flex items-center justify-between pt-4">
+//             <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
+//         </header>
 
-//                 <div className="mt-8 h-full w-full">
-//                     <DataEditor
-//                         getCellContent={getCellContent}
-//                         columns={columns}
-//                         rows={data.length}
-//                         className="custom-data-editor h-full w-full"
-//                         headerHeight={40}
-//                         rowHeight={40}
-//                         onCellClicked={handleCellClick}
-//                     />
-//                 </div>
-//             </Card>
-
-//             {isModalOpen && selectedRow && (
-//                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-//                     <div className="bg-white rounded-lg p-6 w-full h-full">
-//                         <h2 className="text-xl font-bold mb-4">View Journey Details</h2>
-
-//                         {/* Section for Basic Info */}
-//                         <div className="mb-4">
-//                             <h3 className="text-lg font-semibold">Basic Info</h3>
-//                             <p><strong>Journey Name:</strong> {selectedRow.journeyName}</p>
-//                         </div>
-
-//                         {/* Section for Journey Steps */}
-//                         <div className="mb-4">
-//                             <h3 className="text-lg font-semibold">Journey Steps</h3>
-//                             {selectedRow.journeySteps?.length > 0 ? (
-//                                 selectedRow.journeySteps.map((step, index) => (
-//                                     <div key={index} className="mb-2">
-//                                         <p><strong>Seq ID:</strong> {step.seqId}</p>
-//                                         <p><strong>Event Name:</strong> {step.eventName}</p>
-//                                         <p><strong>Step Condition:</strong> {step.stepCondition}</p>
-//                                         <p><strong>Message Configs:</strong></p>
-//                                         {Object.keys(step.messageConfigs).map(key => (
-//                                             <p key={key}><strong>{key}:</strong> {step.messageConfigs[key]}</p>
-//                                         ))}
-//                                     </div>
-//                                 ))
-//                             ) : (
-//                                 <p>No Journey Steps available</p>
-//                             )}
-//                         </div>
-
-//                         {/* Section for Audit Info */}
-//                         <div>
-//                             <h3 className="text-lg font-semibold">Audit Info</h3>
-//                             <p><strong>Created By:</strong> {selectedRow.auditInfo.createdBy}</p>
-//                             <p><strong>Created Time:</strong> {new Date(selectedRow.auditInfo.createdTime).toLocaleString()}</p>
-//                             <p><strong>Updated By:</strong> {selectedRow.auditInfo.updatedBy}</p>
-//                             <p><strong>Updated Time:</strong> {new Date(selectedRow.auditInfo.updatedTime).toLocaleString()}</p>
-//                         </div>
-
-//                         {/* Close Button */}
-//                         <div className="mt-4 flex justify-end">
-//                             <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Close</button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             )}
+//         <div className="mt-8 h-full w-full">
+//             <DataEditor
+//                 getCellContent={getCellContent}
+//                 columns={columns}
+//                 rows={data.length}
+//                 className="custom-data-editor h-full w-full"
+//                 headerHeight={40}
+//                 rowHeight={40}
+//                 onCellClicked={handleCellClick}
+//             />
 //         </div>
+//     </Card>
+
+//     {isModalOpen && selectedRow && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+//             <div className="bg-white rounded-lg p-6 w-full h-full">
+//                 <h2 className="text-xl font-bold mb-4">View Journey Details</h2>
+
+//                 {/* Section for Basic Info */}
+//                 <div className="mb-4">
+//                     <h3 className="text-lg font-semibold">Basic Info</h3>
+//                     <p><strong>Journey Name:</strong> {selectedRow.journeyName}</p>
+//                 </div>
+
+//                 {/* Section for Journey Steps */}
+//                 <div className="mb-4">
+//                     <h3 className="text-lg font-semibold">Journey Steps</h3>
+//                     {selectedRow.journeySteps?.length > 0 ? (
+//                         selectedRow.journeySteps.map((step, index) => (
+//                             <div key={index} className="mb-2">
+//                                 <p><strong>Seq ID:</strong> {step.seqId}</p>
+//                                 <p><strong>Event Name:</strong> {step.eventName}</p>
+//                                 <p><strong>Step Condition:</strong> {step.stepCondition}</p>
+//                                 <p><strong>Message Configs:</strong></p>
+//                                 {Object.keys(step.messageConfigs).map(key => (
+//                                     <p key={key}><strong>{key}:</strong> {step.messageConfigs[key]}</p>
+//                                 ))}
+//                             </div>
+//                         ))
+//                     ) : (
+//                         <p>No Journey Steps available</p>
+//                     )}
+//                 </div>
+
+//                 {/* Section for Audit Info */}
+//                 <div>
+//                     <h3 className="text-lg font-semibold">Audit Info</h3>
+//                     <p><strong>Created By:</strong> {selectedRow.auditInfo.createdBy}</p>
+//                     <p><strong>Created Time:</strong> {new Date(selectedRow.auditInfo.createdTime).toLocaleString()}</p>
+//                     <p><strong>Updated By:</strong> {selectedRow.auditInfo.updatedBy}</p>
+//                     <p><strong>Updated Time:</strong> {new Date(selectedRow.auditInfo.updatedTime).toLocaleString()}</p>
+//                 </div>
+
+//                 {/* Close Button */}
+//                 <div className="mt-4 flex justify-end">
+//                     <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Close</button>
+//                 </div>
+//             </div>
+//         </div>
+//     )}
+// </div>
 //     );
 // }
 
@@ -253,6 +253,14 @@ function JourneyTable() {
     const closeAddModal = () => {
         setIsAddModalOpen(false);
         setNewJourney({ journeyName: "", journeySteps: [] });
+    };
+
+    // Added as part of checking if the Modal works
+    const handleCellClick = (cell: [number, number]) => {
+        const [col, row] = cell;
+        if (columns[col].id === "view") {
+            openModal(data[row]);
+        }
     };
 
     // Add Journey Step to the new journey
@@ -506,7 +514,79 @@ function JourneyTable() {
                     </div>
                 </div>
             )}
+
+            {/* Added as part of checking if the modal works */}
+            <div>
+                <div>
+                    <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
+                        <header className="relative flex items-center justify-between pt-4">
+                            <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
+                        </header>
+
+                        <div className="mt-8 h-full w-full">
+                            <DataEditor
+                                getCellContent={getCellContent}
+                                columns={columns}
+                                rows={data.length}
+                                className="custom-data-editor h-full w-full"
+                                headerHeight={40}
+                                rowHeight={40}
+                                onCellClicked={handleCellClick}
+                            />
+                        </div>
+                    </Card>
+
+                    {isModalOpen && selectedRow && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white rounded-lg p-6 w-full h-full">
+                                <h2 className="text-xl font-bold mb-4">View Journey Details</h2>
+
+                                {/* Section for Basic Info */}
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold">Basic Info</h3>
+                                    <p><strong>Journey Name:</strong> {selectedRow.journeyName}</p>
+                                </div>
+
+                                {/* Section for Journey Steps */}
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold">Journey Steps</h3>
+                                    {selectedRow.journeySteps?.length > 0 ? (
+                                        selectedRow.journeySteps.map((step, index) => (
+                                            <div key={index} className="mb-2">
+                                                <p><strong>Seq ID:</strong> {step.seqId}</p>
+                                                <p><strong>Event Name:</strong> {step.eventName}</p>
+                                                <p><strong>Step Condition:</strong> {step.stepCondition}</p>
+                                                <p><strong>Message Configs:</strong></p>
+                                                {Object.keys(step.messageConfigs).map(key => (
+                                                    <p key={key}><strong>{key}:</strong> {step.messageConfigs[key]}</p>
+                                                ))}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>No Journey Steps available</p>
+                                    )}
+                                </div>
+
+                                {/* Section for Audit Info */}
+                                <div>
+                                    <h3 className="text-lg font-semibold">Audit Info</h3>
+                                    <p><strong>Created By:</strong> {selectedRow.auditInfo.createdBy}</p>
+                                    <p><strong>Created Time:</strong> {new Date(selectedRow.auditInfo.createdTime).toLocaleString()}</p>
+                                    <p><strong>Updated By:</strong> {selectedRow.auditInfo.updatedBy}</p>
+                                    <p><strong>Updated Time:</strong> {new Date(selectedRow.auditInfo.updatedTime).toLocaleString()}</p>
+                                </div>
+
+                                {/* Close Button */}
+                                <div className="mt-4 flex justify-end">
+                                    <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
+
     );
 }
 
