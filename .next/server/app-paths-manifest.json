@@ -1,1 +1,4 @@
-{}
+{
+  "/admin/environments/page": "app/admin/environments/page.js",
+  "/admin/messages/page": "app/admin/messages/page.js"
+}
