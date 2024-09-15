@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tags": {
+      "value": {}
+    },
+    "containerAppsEnvironmentId": {
+      "value": ""
+    },
+    "containerName": {
+      "value": "kinect-messaging"
+    },
+    "containerRegistryName": {
+      "value": "ghcr.io"
+    },
+    "containerRegistryUsername": {
+      "value": "github-user"
+    },
+    "containerRegistryPassword": {
+      "value": ""
+    },
+    "containerImage": {
+      "value": ""
+    },
+    "portNumber": {
+      "value": 3000
+    },
+    "cpu": {
+      "value": "0.25"
+    },
+    "memory": {
+      "value": "0.5Gi"
+    },
+    "minInstance": {
+      "value": 1
+    },
+    "maxInstance": {
+      "value": 1
+    }
+  }
+}
