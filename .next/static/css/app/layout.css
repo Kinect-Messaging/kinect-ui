@@ -1813,6 +1813,9 @@ html {
 .font-normal{
   font-weight: 400;
 }
+.font-semibold{
+  font-weight: 600;
+}
 .uppercase{
   text-transform: uppercase;
 }
@@ -1885,6 +1888,13 @@ html {
 }
 .text-white\/0{
   color: rgb(255 255 255 / 0);
+}
+.text-blue-500{
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246 / var(--tw-text-opacity));
+}
+.underline{
+  text-decoration-line: underline;
 }
 .shadow-2xl{
   --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
