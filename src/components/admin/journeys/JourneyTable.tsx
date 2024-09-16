@@ -534,7 +534,8 @@ function JourneyTable() {
 
             try {
                 const response = await fetch(`https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey/${selectedRow.journeyId}`, {
-                    method: 'PUT',
+                    // method: 'PUT',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
@@ -816,7 +817,7 @@ function JourneyTable() {
 
                                 {/* Save and Cancel Buttons */}
                                 <div className="mt-4 flex justify-end space-x-2">
-                                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSaveEdit}>Save</button>
+                                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>Save</button>
                                     <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Cancel</button>
                                 </div>
                             </div>
