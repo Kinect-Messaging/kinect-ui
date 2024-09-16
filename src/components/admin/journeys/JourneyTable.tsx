@@ -4,36 +4,45 @@ import { DataEditor, GridColumn, GridCell, GridCellKind } from "@glideapps/glide
 import Card from 'components/card';
 import { v4 as uuidv4 } from 'uuid';
 
-import dotenv from 'dotenv';
-dotenv.config();
+type JourneyStep = {
+    seqId: number;
+    eventName: string;
+    stepCondition: string;
+    messageConfigs: { [key: string]: string };
+};
 
 type JourneyData = {
     journeyId: string;
     journeyName: string;
-    journeySteps: { seqId: number; eventName: string; stepCondition: string; messageConfigs: { [key: string]: string }; }[] | null;
-    auditInfo: { createdBy: string; createdTime: string; updatedBy: string; updatedTime: string };
+    journeySteps: JourneyStep[] | null;
+    auditInfo: {
+        createdBy: string;
+        createdTime: string;
+        updatedBy: string;
+        updatedTime: string;
+    };
 };
 
 function JourneyTable() {
     const [data, setData] = useState<JourneyData[]>([]);
     const [selectedRow, setSelectedRow] = useState<JourneyData | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedData, setEditedData] = useState<JourneyData | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false); // View Journey modal
+    const [isEditMode, setIsEditMode] = useState(false); // Edit mode state
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Add Journey modal
+    const [newJourney, setNewJourney] = useState({ journeyName: "", journeySteps: [] as JourneyStep[] }); // New/Edited Journey State
 
     // Fetch data from the API
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', {
+                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
                     headers: {
-                        'Ocp-Apim-Subscription-Key': process.env.REACT_APP_AZURE_SUBSCRIPTION_KEY,
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
                         'X-Transaction-Id': uuidv4()
                     }
                 });
                 const result: JourneyData[] = await response.json();
                 setData(result);
-                console.log(result)
             } catch (error) {
                 console.error("Error fetching journey data:", error);
             }
@@ -41,38 +50,146 @@ function JourneyTable() {
         fetchData();
     }, []);
 
-    const openModal = (row: JourneyData) => {
+    // Handle opening the modal to view/edit details
+    const openModal = (row: JourneyData, editMode = false) => {
         setSelectedRow(row);
-        setEditedData(row);
+        setNewJourney({
+            journeyName: row.journeyName,
+            journeySteps: row.journeySteps || [],
+        });
+        setIsEditMode(editMode); // Set edit mode based on whether the user clicked "Edit"
         setIsModalOpen(true);
-        setIsEditing(false);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedRow(null);
+        setIsEditMode(false);
     };
 
-    const handleEditClick = () => {
-        setIsEditing(true);
+    // Handle opening the modal to add new data
+    const openAddModal = () => {
+        setIsAddModalOpen(true);
     };
 
-    const handleSaveClick = () => {
-        if (editedData) {
-            setData(prevData =>
-                prevData.map(item => item === selectedRow ? editedData : item)
-            );
+    const closeAddModal = () => {
+        setIsAddModalOpen(false);
+        setNewJourney({ journeyName: "", journeySteps: [] });
+    };
+
+    // Add Journey Step to the new or edited journey
+    const addJourneyStep = () => {
+        setNewJourney({
+            ...newJourney,
+            journeySteps: [...newJourney.journeySteps, { seqId: newJourney.journeySteps.length + 1, eventName: "", stepCondition: "", messageConfigs: {} }]
+        });
+    };
+
+    // Handle input change in the form
+    const handleInputChange = (field: keyof typeof newJourney, value: any) => {
+        setNewJourney((prevData) => ({
+            ...prevData,
+            [field]: value,
+        }));
+    };
+
+    const handleStepInputChange = (index: number, field: keyof JourneyStep, value: any) => {
+        const updatedSteps = [...newJourney.journeySteps];
+
+        if (field === 'messageConfigs') {
+            // Handle messageConfigs specifically as an object
+            updatedSteps[index] = {
+                ...updatedSteps[index],
+                messageConfigs: {
+                    ...updatedSteps[index].messageConfigs,
+                    ...value // Merge new key-value pair into messageConfigs
+                }
+            };
+        } else {
+            updatedSteps[index] = { ...updatedSteps[index], [field]: value };
         }
-        setIsEditing(false);
-        closeModal();
+
+        setNewJourney((prevData) => ({
+            ...prevData,
+            journeySteps: updatedSteps,
+        }));
     };
 
-    const handleInputChange = (field: keyof JourneyData, value: string) => {
-        if (editedData) {
-            setEditedData(prevData => ({
-                ...prevData!,
-                [field]: value
-            }));
+    // Handle form submission to POST new data
+    const handleSubmit = async () => {
+        const currentDate = new Date().toISOString();
+        const newJourneyData: JourneyData = {
+            journeyId: uuidv4(),
+            journeyName: newJourney.journeyName,
+            journeySteps: newJourney.journeySteps.length > 0 ? newJourney.journeySteps : null,
+            auditInfo: {
+                createdBy: "Current User",
+                createdTime: currentDate,
+                updatedBy: "Current User",
+                updatedTime: currentDate,
+            },
+        };
+
+        try {
+            const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
+                    'X-Transaction-Id': uuidv4()
+                },
+                body: JSON.stringify(newJourneyData),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setData([...data, result]); // Add the new journey to the data table
+                closeAddModal();
+            } else {
+                console.error('Failed to add new journey');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    // Handle Save Edit functionality
+    const handleSaveEdit = async () => {
+        if (selectedRow) {
+            const updatedJourneyData: JourneyData = {
+                ...selectedRow,
+                journeyName: newJourney.journeyName,
+                journeySteps: newJourney.journeySteps,
+                auditInfo: {
+                    ...selectedRow.auditInfo,
+                    updatedBy: "Current User", // Replace with actual user
+                    updatedTime: new Date().toISOString(), // Automatically set updatedTime
+                },
+            };
+
+            try {
+                const response = await fetch(`https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey/${selectedRow.journeyId}`, {
+                    // method: 'PUT',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
+                        'X-Transaction-Id': uuidv4()
+                    },
+                    body: JSON.stringify(updatedJourneyData),
+                });
+
+                if (response.ok) {
+                    const updatedData = await response.json();
+                    const updatedDataList = data.map(journey => journey.journeyId === updatedData.journeyId ? updatedData : journey);
+                    setData(updatedDataList); // Update the journey in the data table
+                    setIsEditMode(false); // Exit edit mode after saving
+                } else {
+                    console.error('Failed to update journey');
+                }
+            } catch (error) {
+                console.error('Error updating journey:', error);
+            }
         }
     };
 
@@ -88,66 +205,38 @@ function JourneyTable() {
         const dataRow = data[row];
 
         if (!dataRow) {
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: "",
-                data: "",
-            };
+            return { kind: GridCellKind.Text, allowOverlay: false, displayData: "", data: "" };
         }
 
         const columnId = columns[col].id;
 
-        // Handle the "View" column separately with a button
         if (columnId === "view") {
             return {
                 kind: GridCellKind.Custom,
                 allowOverlay: true,
                 copyData: "View",
-                data: <button className="bg-blue-500 text-white px-2 py-1 rounded">View</button>,
+                data: <a className="text-blue-500 cursor-pointer underline" onClick={() => openModal(dataRow)}>View</a>,
             };
         }
 
-        // Handle the "Journey Step Length" column
         if (columnId === "journeyStepLength") {
             const length = dataRow.journeySteps ? dataRow.journeySteps.length.toString() : "0";
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: length,
-                data: length,
-            };
+            return { kind: GridCellKind.Text, allowOverlay: false, displayData: length, data: length };
         }
 
-        // Handle the "Created Time" column
         if (columnId === "createdTime") {
-            const createdTime = new Date(dataRow.auditInfo.createdTime).toLocaleString();
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: createdTime,
-                data: createdTime,
-            };
+            const createdTime = dataRow.auditInfo?.createdTime ? new Date(dataRow.auditInfo.createdTime).toLocaleString() : "";
+            return { kind: GridCellKind.Text, allowOverlay: false, displayData: createdTime, data: createdTime };
         }
 
-        // Safely access the data for the "Journey Name" column
-        if (columnId === "journeyName") {
-            const journeyName = dataRow.journeyName || "Unnamed Journey";
-            return {
-                kind: GridCellKind.Text,
-                allowOverlay: false,
-                displayData: journeyName,
-                data: journeyName,
-            };
-        }
-
+        const cellData = (dataRow as any)[columnId];
         return {
             kind: GridCellKind.Text,
             allowOverlay: false,
-            displayData: "",
-            data: "",
+            displayData: typeof cellData === "string" ? cellData : "",
+            data: typeof cellData === "string" ? cellData : "",
         };
-    }, [data, columns]);
+    }, [data]);
 
     const handleCellClick = (cell: [number, number]) => {
         const [col, row] = cell;
@@ -160,9 +249,8 @@ function JourneyTable() {
         <div>
             <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
                 <header className="relative flex items-center justify-between pt-4">
-                    <div className="text-xl font-bold text-navy-700 dark:text-white">
-                        Journeys Data Grid
-                    </div>
+                    <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={openAddModal}>Add Journey</button>
                 </header>
 
                 <div className="mt-8 h-full w-full">
@@ -173,94 +261,202 @@ function JourneyTable() {
                         className="custom-data-editor h-full w-full"
                         headerHeight={40}
                         rowHeight={40}
-                        onCellClicked={handleCellClick}  // Handle cell clicks for opening the modal
+                        onCellClicked={handleCellClick}
                     />
                 </div>
             </Card>
 
-            {isModalOpen && (
+            {/* Add Journey Modal */}
+            {isAddModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-full h-full">
-                        <h2 className="text-xl font-bold mb-4">{isEditing ? "Edit Journey Details" : "View Journey Details"}</h2>
-                        {selectedRow && (
-                            <div>
-                                <div>
-                                    <label><strong>Journey Name:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeyName}
-                                            onChange={(e) => handleInputChange('journeyName', e.target.value)}
-                                            className="w-full border rounded p-2"
-                                        />
-                                    ) : (
-                                        <p>{selectedRow.journeyName}</p>
-                                    )}
-                                </div>
-                                <div>
+                        <h2 className="text-xl font-bold mb-4">Add New Journey</h2>
+
+                        {/* Journey Name */}
+                        <div className="mb-4">
+                            <label><strong>Journey Name:</strong></label>
+                            <input
+                                type="text"
+                                value={newJourney.journeyName}
+                                onChange={(e) => handleInputChange("journeyName", e.target.value)}
+                                className="w-full border rounded p-2"
+                            />
+                        </div>
+
+                        {/* Journey Steps */}
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold">Journey Steps</h3>
+                            {newJourney.journeySteps.map((step, index) => (
+                                <div key={index} className="mb-2">
+                                    <label><strong>Seq ID:</strong></label>
+                                    <input
+                                        type="number"
+                                        value={step.seqId}
+                                        onChange={(e) => handleStepInputChange(index, 'seqId', e.target.value)}
+                                        className="w-full border rounded p-2"
+                                    />
                                     <label><strong>Event Name:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeySteps?.[0]?.eventName || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
-                                            className="w-full border rounded p-2"
-                                        />
+                                    <input
+                                        type="text"
+                                        value={step.eventName}
+                                        onChange={(e) => handleStepInputChange(index, 'eventName', e.target.value)}
+                                        className="w-full border rounded p-2"
+                                    />
+                                    <label><strong>Step Condition:</strong></label>
+                                    <input
+                                        type="text"
+                                        value={step.stepCondition}
+                                        onChange={(e) => handleStepInputChange(index, 'stepCondition', e.target.value)}
+                                        className="w-full border rounded p-2"
+                                    />
+                                    {/* Message Configs */}
+                                    <label><strong>Message Configs:</strong></label>
+                                    <input
+                                        type="text"
+                                        value={step.messageConfigs["1"] || ""}
+                                        onChange={(e) => handleStepInputChange(index, 'messageConfigs', { "1": e.target.value })}
+                                        className="w-full border rounded p-2"
+                                        placeholder="Message Config 1"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={step.messageConfigs["2"] || ""}
+                                        onChange={(e) => handleStepInputChange(index, 'messageConfigs', { "2": e.target.value })}
+                                        className="w-full border rounded p-2"
+                                        placeholder="Message Config 2"
+                                    />
+                                </div>
+                            ))}
+                            <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={addJourneyStep}>Add Step</button>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="mt-4 flex justify-end space-x-2">
+                            <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>Submit</button>
+                            <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeAddModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* View and Edit Journey Modal */}
+            {isModalOpen && selectedRow && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg p-6 w-full h-full">
+                        <h2 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Journey' : 'View Journey Details'}</h2>
+
+                        {!isEditMode ? (
+                            // View mode
+                            <div>
+                                {/* Section for Basic Info */}
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold">Basic Info</h3>
+                                    <p><strong>Journey Name:</strong> {selectedRow.journeyName}</p>
+                                </div>
+
+                                {/* Section for Journey Steps */}
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold">Journey Steps</h3>
+                                    {selectedRow.journeySteps?.length > 0 ? (
+                                        selectedRow.journeySteps.map((step, index) => (
+                                            <div key={index} className="mb-2">
+                                                <p><strong>Seq ID:</strong> {step.seqId}</p>
+                                                <p><strong>Event Name:</strong> {step.eventName}</p>
+                                                <p><strong>Step Condition:</strong> {step.stepCondition}</p>
+                                                <p><strong>Message Configs:</strong></p>
+                                                {Object.keys(step.messageConfigs).map(key => (
+                                                    <p key={key}><strong>{key}:</strong> {step.messageConfigs[key]}</p>
+                                                ))}
+                                            </div>
+                                        ))
                                     ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.eventName || "N/A"}</p>
+                                        <p>No Journey Steps available</p>
                                     )}
                                 </div>
+
+                                {/* Section for Audit Info */}
                                 <div>
-                                    <label><strong>Message Config 1:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeySteps?.[0]?.messageConfigs["1"] || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
-                                            className="w-full border rounded p-2"
-                                        />
-                                    ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.messageConfigs["1"] || "N/A"}</p>
-                                    )}
+                                    <h3 className="text-lg font-semibold">Audit Info</h3>
+                                    <p><strong>Created By:</strong> {selectedRow.auditInfo.createdBy}</p>
+                                    <p><strong>Created Time:</strong> {new Date(selectedRow.auditInfo.createdTime).toLocaleString()}</p>
+                                    <p><strong>Updated By:</strong> {selectedRow.auditInfo.updatedBy}</p>
+                                    <p><strong>Updated Time:</strong> {new Date(selectedRow.auditInfo.updatedTime).toLocaleString()}</p>
                                 </div>
-                                <div>
-                                    <label><strong>Message Config 2:</strong></label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedData?.journeySteps?.[0]?.messageConfigs["2"] || ""}
-                                            onChange={(e) => handleInputChange('journeySteps', e.target.value)} // Update as necessary
-                                            className="w-full border rounded p-2"
-                                        />
-                                    ) : (
-                                        <p>{selectedRow.journeySteps?.[0]?.messageConfigs["2"] || "N/A"}</p>
-                                    )}
+
+                                {/* Close and Edit Buttons */}
+                                <div className="mt-4 flex justify-end space-x-2">
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => openModal(selectedRow, true)}>Edit</button>
+                                    <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Close</button>
+                                </div>
+                            </div>
+                        ) : (
+                            // Edit mode
+                            <div>
+                                {/* Edit Journey Form */}
+                                <div className="mb-4">
+                                    <label><strong>Journey Name:</strong></label>
+                                    <input
+                                        type="text"
+                                        value={newJourney.journeyName}
+                                        onChange={(e) => handleInputChange("journeyName", e.target.value)}
+                                        className="w-full border rounded p-2"
+                                    />
+                                </div>
+
+                                {/* Edit Journey Steps */}
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold">Journey Steps</h3>
+                                    {newJourney.journeySteps.map((step, index) => (
+                                        <div key={index} className="mb-2">
+                                            <label><strong>Seq ID:</strong></label>
+                                            <input
+                                                type="number"
+                                                value={step.seqId}
+                                                onChange={(e) => handleStepInputChange(index, 'seqId', e.target.value)}
+                                                className="w-full border rounded p-2"
+                                            />
+                                            <label><strong>Event Name:</strong></label>
+                                            <input
+                                                type="text"
+                                                value={step.eventName}
+                                                onChange={(e) => handleStepInputChange(index, 'eventName', e.target.value)}
+                                                className="w-full border rounded p-2"
+                                            />
+                                            <label><strong>Step Condition:</strong></label>
+                                            <input
+                                                type="text"
+                                                value={step.stepCondition}
+                                                onChange={(e) => handleStepInputChange(index, 'stepCondition', e.target.value)}
+                                                className="w-full border rounded p-2"
+                                            />
+                                            {/* Message Configs */}
+                                            <label><strong>Message Configs:</strong></label>
+                                            <input
+                                                type="text"
+                                                value={step.messageConfigs["1"] || ""}
+                                                onChange={(e) => handleStepInputChange(index, 'messageConfigs', { "1": e.target.value })}
+                                                className="w-full border rounded p-2"
+                                                placeholder="Message Config 1"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={step.messageConfigs["2"] || ""}
+                                                onChange={(e) => handleStepInputChange(index, 'messageConfigs', { "2": e.target.value })}
+                                                className="w-full border rounded p-2"
+                                                placeholder="Message Config 2"
+                                            />
+                                        </div>
+                                    ))}
+                                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={addJourneyStep}>Add Step</button>
+                                </div>
+
+                                {/* Save and Cancel Buttons */}
+                                <div className="mt-4 flex justify-end space-x-2">
+                                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>Save</button>
+                                    <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={closeModal}>Cancel</button>
                                 </div>
                             </div>
                         )}
-                        <div className="mt-4 flex justify-end space-x-2">
-                            {isEditing ? (
-                                <button
-                                    className="bg-green-500 text-white px-4 py-2 rounded"
-                                    onClick={handleSaveClick}
-                                >
-                                    Save
-                                </button>
-                            ) : (
-                                <button
-                                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                                    onClick={handleEditClick}
-                                >
-                                    Edit
-                                </button>
-                            )}
-                            <button
-                                className="bg-gray-500 text-white px-4 py-2 rounded"
-                                onClick={closeModal}
-                            >
-                                {isEditing ? "Cancel" : "Close"}
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}
