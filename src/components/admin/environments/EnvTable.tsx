@@ -423,6 +423,14 @@ function EnvTable() {
         };
     }, [data]);
 
+    // Add the onCellClicked function here to make sure modals open correctly
+    const handleCellClick = (cell: [number, number]) => {
+        const [col, row] = cell;
+        if (columns[col].id === "view") {
+            openModal(data[row]);
+        }
+    };
+
     return (
         <div>
             <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
@@ -439,6 +447,7 @@ function EnvTable() {
                         className="custom-data-editor h-full w-full"
                         headerHeight={40}
                         rowHeight={40}
+                        onCellClicked={handleCellClick} // Add this here
                     />
                 </div>
             </Card>
