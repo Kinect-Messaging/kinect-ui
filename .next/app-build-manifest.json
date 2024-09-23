@@ -1,10 +1,10 @@
 {
   "pages": {
-    "/admin/environments/page": [
+    "/admin/messages/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/admin/environments/page.css",
-      "static/chunks/app/admin/environments/page.js"
+      "static/css/app/admin/messages/page.css",
+      "static/chunks/app/admin/messages/page.js"
     ],
     "/admin/layout": [
       "static/chunks/webpack.js",
@@ -16,12 +16,6 @@
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
-    ],
-    "/admin/messages/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/admin/messages/page.css",
-      "static/chunks/app/admin/messages/page.js"
     ],
     "/admin/journeys/page": [
       "static/chunks/webpack.js",
