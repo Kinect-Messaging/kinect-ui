@@ -31,6 +31,10 @@ const routes = [
     icon: <IoMdGlobe className="h-6 w-6" />,
     path: 'environments',
   },
+  {
+    layout:'/admin/',
+    path: 'journeys/journey-flow'
+  }
   // {
   //   name: 'Main Dashboard',
   //   layout: '/admin',

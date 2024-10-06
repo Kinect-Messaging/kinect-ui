@@ -2,6 +2,8 @@
 
 import { HiX } from 'react-icons/hi';
 import Links from './components/Links';
+import Image from 'next/image';
+import Logo from '../../../public/img/logo/Kinect_Messaging_Main_Logo.png';
 
 import SidebarCard from 'components/sidebar/components/SidebarCard';
 import { IRoute } from 'types/navigation';
@@ -22,7 +24,7 @@ function SidebarHorizon(props: { routes: IRoute[];[x: string]: any }) {
 
       <div className={`mx-[56px] mt-[50px] flex items-center`}>
         <div className="ml-1 mt-1 h-2.5 font-poppins text-[20px] font-bold uppercase text-navy-700 dark:text-white">
-          Kinect Messaging
+          <Image src={Logo} alt="Kinect Messaging Logo" width={200} height={50} />
         </div>
       </div>
       <div className="mb-7 mt-[58px] h-px bg-gray-300 dark:bg-white/30" />
