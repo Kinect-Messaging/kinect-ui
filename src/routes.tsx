@@ -32,16 +32,16 @@ const routes = [
     path: 'environments',
   },
   {
-    name: 'Journey Flow',
+    name: 'Journey Flow Placeholder',
     layout:'/admin',
+    icon: <IoMdGlobe className="h-6 w-6" />,
     path: 'journeys/journey-flow',
-    hidden: true,
   },
   {
-    name: 'Journey Flow Editor',
+    name: 'Journey Flow Editor Placeholder',
     layout: '/admin',
+    icon: <IoMdGlobe className="h-6 w-6" />,
     path: 'journeys/journey-flow-editor',
-    hidden: true,
   }
   // {
   //   name: 'Main Dashboard',

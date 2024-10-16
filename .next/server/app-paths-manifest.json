@@ -1,5 +1,16 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/admin/journeys/page": "app/admin/journeys/page.js",
-  "/admin/default/page": "app/admin/default/page.js"
+  "/admin/data-tables/page": "app/admin/data-tables/page.js",
+  "/admin/default/page": "app/admin/default/page.js",
+  "/admin/environments/page": "app/admin/environments/page.js",
+  "/admin/nft-marketplace/page": "app/admin/nft-marketplace/page.js",
+  "/admin/journeys/journey-flow/page": "app/admin/journeys/journey-flow/page.js",
+  "/admin/journeys/journey-flow-editor/page": "app/admin/journeys/journey-flow-editor/page.js",
+  "/admin/messages/page": "app/admin/messages/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/auth/sign-in/page": "app/auth/sign-in/page.js",
+  "/admin/profile/page": "app/admin/profile/page.js",
+  "/rtl/rtl-default/page": "app/rtl/rtl-default/page.js",
+  "/admin/journeys/page": "app/admin/journeys/page.js"
 }
