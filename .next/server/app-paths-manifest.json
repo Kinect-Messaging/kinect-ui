@@ -1,4 +1,5 @@
 {
+  "/page": "app/page.js",
   "/admin/journeys/page": "app/admin/journeys/page.js",
-  "/admin/journeys/journey-flow/page": "app/admin/journeys/journey-flow/page.js"
+  "/admin/default/page": "app/admin/default/page.js"
 }

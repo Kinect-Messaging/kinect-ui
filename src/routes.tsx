@@ -32,8 +32,16 @@ const routes = [
     path: 'environments',
   },
   {
-    layout:'/admin/',
-    path: 'journeys/journey-flow'
+    name: 'Journey Flow',
+    layout:'/admin',
+    path: 'journeys/journey-flow',
+    hidden: true,
+  },
+  {
+    name: 'Journey Flow Editor',
+    layout: '/admin',
+    path: 'journeys/journey-flow-editor',
+    hidden: true,
   }
   // {
   //   name: 'Main Dashboard',
