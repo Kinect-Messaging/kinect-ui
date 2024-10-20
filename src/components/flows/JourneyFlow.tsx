@@ -63,6 +63,7 @@ const nodeTypes = {
 const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [journeyName, setJourneyName] = useState<string>('');
 
   useEffect(() => {
     const fetchJourneyData = async () => {
@@ -75,6 +76,7 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
             }
           });
           const journeyData: JourneyData = await response.json();
+          setJourneyName(journeyData.journeyName);
           createNodesAndEdges(journeyData);
         } catch (error) {
           console.error("Error fetching journey data:", error);
@@ -89,15 +91,6 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
 
-    // Create journey name node
-    newNodes.push({
-      id: 'journey-name',
-      data: { label: journeyData.journeyName },
-      position: { x: 250, y: 0 },
-      type: 'input',
-      draggable: true,
-    });
-
     // Create nodes and edges for each journey step
     journeyData.journeySteps?.forEach((step, index) => {
       const stepNodeId = `step-${step.seqId}`;
@@ -108,20 +101,13 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
           label: `Step ${step.seqId}: ${step.eventName}`,
           condition: step.stepCondition,
         },
-        position: { x: 250, y: (index + 1) * 150 },
+        position: { x: 250, y: index * 150 },
         draggable: true,
       };
       newNodes.push(stepNode);
 
       // Connect to previous node
-      if (index === 0) {
-        newEdges.push({
-          id: `e-journey-${stepNodeId}`,
-          source: 'journey-name',
-          target: stepNodeId,
-          animated: true,
-        });
-      } else {
+      if (index > 0) {
         const prevNodeId = `step-${journeyData.journeySteps[index - 1].seqId}`;
         newEdges.push({
           id: `e-${prevNodeId}-${stepNodeId}`,
@@ -141,7 +127,7 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
             label: `Config ${configKey}`,
             value: configValue,
           },
-          position: { x: 400 + configIndex * 200, y: (index + 1) * 150 },
+          position: { x: 400 + configIndex * 200, y: index * 150 },
           draggable: true,
         };
         newNodes.push(configNode);
@@ -171,18 +157,24 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
   );
 
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView
-      >
-        <Controls />
-        <Background />
-      </ReactFlow>
+    <div className="flex flex-col h-screen">
+      <div className="p-4 bg-gray-100">
+        <h1 className="text-2xl font-bold">Journey Flow</h1>
+        <h2 className="text-xl">{journeyName}</h2>
+      </div>
+      <div className="flex-grow">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+        >
+          <Controls />
+          <Background />
+        </ReactFlow>
+      </div>
     </div>
   );
 };
