@@ -39,7 +39,10 @@ type JourneyData = {
 };
 
 const StepNode = ({ data }: { data: any }) => (
-  <div className="border rounded p-2 bg-white">
+  <div 
+    className="border rounded p-2 bg-white cursor-pointer hover:bg-gray-100"
+    onClick={() => data.onClick(data.id, data.stepData)}
+  >
     <Handle type="target" position={Position.Top} />
     <div className="font-bold">{data.label}</div>
     <div className="text-sm">Condition: {data.condition}</div>
@@ -64,6 +67,36 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [journeyName, setJourneyName] = useState<string>('');
+
+  const handleNodeClick = (nodeId: string, stepData: JourneyStep) => {
+    const detailsUrl = `/admin/journeys/step-details?id=${nodeId}&journeyId=${journeyId}`;
+    const detailsContent = `
+      <html>
+        <head>
+          <title>Step Details: ${stepData.eventName}</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+            h1 { color: #333; }
+            pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <h1>Step Details: ${stepData.eventName}</h1>
+          <p><strong>Sequence ID:</strong> ${stepData.seqId}</p>
+          <p><strong>Event Name:</strong> ${stepData.eventName}</p>
+          <p><strong>Step Condition:</strong> ${stepData.stepCondition}</p>
+          <h2>Message Configs:</h2>
+          <pre>${JSON.stringify(stepData.messageConfigs, null, 2)}</pre>
+        </body>
+      </html>
+    `;
+
+    const newWindow = window.open(detailsUrl, '_blank');
+    if (newWindow) {
+      newWindow.document.write(detailsContent);
+      newWindow.document.close();
+    }
+  };
 
   useEffect(() => {
     const fetchJourneyData = async () => {
@@ -91,7 +124,6 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
 
-    // Create nodes and edges for each journey step
     journeyData.journeySteps?.forEach((step, index) => {
       const stepNodeId = `step-${step.seqId}`;
       const stepNode: Node = {
@@ -100,6 +132,9 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
         data: {
           label: `Step ${step.seqId}: ${step.eventName}`,
           condition: step.stepCondition,
+          onClick: handleNodeClick,
+          id: stepNodeId,
+          stepData: step,
         },
         position: { x: 250, y: index * 150 },
         draggable: true,
