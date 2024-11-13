@@ -1,10 +1,11 @@
 'use client'
 import "@glideapps/glide-data-grid/dist/index.css";
 import React, { useState, useEffect, useCallback } from "react";
-import { DataEditor, GridColumn, GridCell, GridCellKind } from "@glideapps/glide-data-grid";
+import { DataEditor, GridColumn, GridCell, GridCellKind} from "@glideapps/glide-data-grid";
 import Card from 'components/card';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation'
+import { background } from "@chakra-ui/system";
 
 type JourneyStep = {
     seqId: number;
@@ -107,9 +108,9 @@ function JourneyTable() {
                     data: { kind: "button-cell", label: "Edit", onClick: () => navigateToJourneyFlowEditor(dataRow.journeyId) },
                 };
             default:
-                cellData = "";
+                // cellData = "";
         }
-
+        
         return {
             kind: GridCellKind.Text,
             allowOverlay: false,
@@ -133,7 +134,7 @@ function JourneyTable() {
 
     return (
         <div>
-            <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full">
+            <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full" style={{padding:'10px', backgroundColor:'#fff', borderRadius: '2%'}}>
                 <header className="relative flex items-center justify-between pt-4">
                     <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
                     <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => navigateToJourneyFlowEditor('')}>Add Journey</button>
@@ -148,6 +149,12 @@ function JourneyTable() {
                         headerHeight={40}
                         rowHeight={40}
                         onCellClicked={onCellClicked}
+                        theme={{
+                            accentColor :"#ffffff",
+                            bgCell: "#ffffff",            // Background color for cells
+                            bgHeader: "#cccccc",
+                            borderColor: "transparent"
+                        }}
                     />
                 </div>
             </Card>
