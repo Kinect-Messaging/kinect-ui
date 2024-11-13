@@ -153,7 +153,9 @@ function JourneyTable() {
                             accentColor :"#ffffff",
                             bgCell: "#ffffff",            // Background color for cells
                             bgHeader: "#cccccc",
-                            borderColor: "transparent"
+                            borderColor: "transparent",
+                            textHeader: "#000",
+                            textHeaderSelected: "#000"
                         }}
                     />
                 </div>
