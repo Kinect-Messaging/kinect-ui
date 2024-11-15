@@ -11,6 +11,7 @@ import ReactFlow, {
     applyNodeChanges,
     applyEdgeChanges,
     Handle,
+    MiniMap,
     Position,
     MarkerType,
     NodeProps,
@@ -55,7 +56,7 @@ const JourneyStepNode = ({ data }: NodeProps) => (
                 <input
                     type="text"
                     value={data.eventName}
-                    onChange={(e) => data.onChange(data.id, 'eventName', e.target.value)}
+                    onChange={(e) => data.onChange(data.id, `${data.eventName}`, e.target.value)}
                     className="w-full p-1 text-sm border rounded"
                     placeholder="Enter event name"
                 />
@@ -164,6 +165,7 @@ const JourneyFlowEditor = () => {
     }
 
     function addMessage(nodeId: string) {
+        console.log('here ')
         setNodes((nds) =>
             nds.map((node) => {
                 if (node.id === nodeId) {
@@ -285,8 +287,8 @@ const JourneyFlowEditor = () => {
     };
 
     return (
-        <div className="h-screen w-full flex flex-col p-4">
-            <div className="mb-4 flex items-center space-x-4">
+        <div className="h-screen w-full flex flex-col ">
+            <div className="mb-2 flex items-center space-x-4">
                 <button onClick={() => addChildStep('journeyName')} className="bg-blue-500 text-white px-4 py-2 rounded">Add Root Step</button>
                 <button onClick={saveJourney} className="bg-green-500 text-white px-4 py-2 rounded">Save Journey</button>
             </div>
@@ -302,6 +304,7 @@ const JourneyFlowEditor = () => {
                 >
                     <Background />
                     <Controls />
+                    <MiniMap />
                 </ReactFlow>
             </div>
         </div>

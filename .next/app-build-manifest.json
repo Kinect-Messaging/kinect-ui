@@ -39,6 +39,12 @@
       "static/chunks/main-app.js",
       "static/css/app/admin/journeys/journey-flow-editor/page.css",
       "static/chunks/app/admin/journeys/journey-flow-editor/page.js"
+    ],
+    "/admin/messages/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/admin/messages/page.css",
+      "static/chunks/app/admin/messages/page.js"
     ]
   }
 }

@@ -32,13 +32,13 @@ const routes = [
     path: 'environments',
   },
   {
-    name: 'Journey Flow Placeholder',
+    name: 'Journey Flow PH',
     layout:'/admin',
     icon: <IoMdGlobe className="h-6 w-6" />,
     path: 'journeys/journey-flow',
   },
   {
-    name: 'Journey Flow Editor Placeholder',
+    name: 'Journey Flow Editor PH',
     layout: '/admin',
     icon: <IoMdGlobe className="h-6 w-6" />,
     path: 'journeys/journey-flow-editor',

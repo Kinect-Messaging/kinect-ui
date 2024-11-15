@@ -134,7 +134,7 @@ function JourneyTable() {
 
     return (
         <div>
-            <Card extra={'w-full h-full sm:overflow-auto px-6'} className="w-full" style={{padding:'10px', backgroundColor:'#fff', borderRadius: '2%'}}>
+            <Card extra={'w-full h-full sm:overflow-auto px-2'} className="w-full" style={{padding:'10px', backgroundColor:'#fff', borderRadius: '2%'}}>
                 <header className="relative flex items-center justify-between pt-4">
                     <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
                     <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => navigateToJourneyFlowEditor('')}>Add Journey</button>
