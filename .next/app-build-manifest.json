@@ -6,21 +6,21 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/admin/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/admin/layout.js"
     ],
-    "/admin/default/page": [
+    "/admin/journeys/journey-flow-editor/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/admin/default/page.css",
-      "static/chunks/app/admin/default/page.js"
+      "static/css/app/admin/journeys/journey-flow-editor/page.css",
+      "static/chunks/app/admin/journeys/journey-flow-editor/page.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ],
     "/admin/journeys/page": [
       "static/chunks/webpack.js",
@@ -28,17 +28,17 @@
       "static/css/app/admin/journeys/page.css",
       "static/chunks/app/admin/journeys/page.js"
     ],
+    "/admin/default/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/admin/default/page.css",
+      "static/chunks/app/admin/default/page.js"
+    ],
     "/admin/journeys/journey-flow/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/admin/journeys/journey-flow/page.css",
       "static/chunks/app/admin/journeys/journey-flow/page.js"
-    ],
-    "/admin/journeys/journey-flow-editor/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/admin/journeys/journey-flow-editor/page.css",
-      "static/chunks/app/admin/journeys/journey-flow-editor/page.js"
     ],
     "/admin/messages/page": [
       "static/chunks/webpack.js",

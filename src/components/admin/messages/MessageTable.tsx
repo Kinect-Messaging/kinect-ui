@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { DataEditor, GridColumn, GridCell, GridCellKind } from "@glideapps/glide-data-grid";
 import Card from 'components/card';
 import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
 
 type ToRecipient = {
     firstName: string;
@@ -58,13 +59,13 @@ function MessageTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', {
+                const response = await axios.get('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', {
                     headers: {
                         'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
                         'X-Transaction-Id': uuidv4()
                     }
                 });
-                const result: MessageData[] = await response.json();
+                const result: MessageData[] = response.data;
                 setData(result);
                 console.log(result);
             } catch (error) {
@@ -152,18 +153,19 @@ function MessageTable() {
         };
 
         try {
-            const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
-                    'X-Transaction-Id': uuidv4()
-                },
-                body: JSON.stringify(newMessageData),
-            });
+            const response = await axios.post('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/message', 
+                newMessageData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
+                        'X-Transaction-Id': uuidv4()
+                    }
+                }
+            );
 
-            if (response.ok) {
-                const result = await response.json();
+            if (response.status === 200 || response.status === 201) {
+                const result = response.data;
                 setData([...data, result]); // Add the new message to the data table
                 closeAddModal();
             } else {
@@ -188,7 +190,7 @@ function MessageTable() {
 
         // Make sure dataRow exists
         if (!dataRow) {
-            return { kind: GridCellKind.Text, allowOverlay: false, displayData: "", data: "" };
+            return { kind: GridCellKind.Text, allowOverlay: true, displayData: "", data: "" };
         }
 
         const columnId = columns[col].id;
@@ -217,9 +219,10 @@ function MessageTable() {
     // Add the onCellClicked function here to make sure modals open correctly
     const handleCellClick = (cell: [number, number]) => {
         const [col, row] = cell;
-        if (columns[col].id === "view") {
+        // if (columns[col].id === "view") {
+        alert('row click')
             openModal(data[row]);
-        }
+        // }
     };
 
     return (
@@ -238,6 +241,7 @@ function MessageTable() {
                         className="custom-data-editor h-full w-full"
                         headerHeight={40}
                         rowHeight={40}
+                        rowMarkers="checkbox-visible"
                         onCellClicked={handleCellClick} // Add this here
                     />
                 </div>

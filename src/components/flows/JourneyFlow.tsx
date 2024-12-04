@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactFlow, {
   addEdge,
@@ -102,13 +103,13 @@ const JourneyFlow: React.FC<JourneyFlowProps> = ({ journeyId }) => {
     const fetchJourneyData = async () => {
       if (journeyId) {
         try {
-          const response = await fetch(`https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey/${journeyId}`, {
+          const response = await axios.get(`https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey/${journeyId}`, {
             headers: {
               'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY || '',
               'X-Transaction-Id': uuidv4()
             }
           });
-          const journeyData: JourneyData = await response.json();
+          const journeyData: JourneyData = response.data;
           setJourneyName(journeyData.journeyName);
           createNodesAndEdges(journeyData);
         } catch (error) {

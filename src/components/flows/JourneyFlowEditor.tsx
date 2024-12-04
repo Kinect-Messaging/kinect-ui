@@ -19,6 +19,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 type Message = {
     id: string;
@@ -266,17 +267,18 @@ const JourneyFlowEditor = () => {
         };
 
         try {
-            const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY || '',
-                    'X-Transaction-Id': uuidv4()
-                },
-                body: JSON.stringify(journeyData),
-            });
+            const response = await axios.post('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', 
+                journeyData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY || '',
+                        'X-Transaction-Id': uuidv4()
+                    }
+                }
+            );
 
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 router.push('/admin/journeys');
             } else {
                 console.error('Failed to add new journey');

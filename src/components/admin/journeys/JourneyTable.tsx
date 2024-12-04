@@ -3,6 +3,7 @@ import "@glideapps/glide-data-grid/dist/index.css";
 import React, { useState, useEffect, useCallback } from "react";
 import { DataEditor, GridColumn, GridCell, GridCellKind} from "@glideapps/glide-data-grid";
 import Card from 'components/card';
+import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation'
 import { background } from "@chakra-ui/system";
@@ -34,13 +35,13 @@ function JourneyTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
+                const response = await axios.get('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
                     headers: {
                         'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY || '',
                         'X-Transaction-Id': uuidv4()
                     }
                 });
-                const result: JourneyData[] = await response.json();
+                const result: JourneyData[] = response.data;
                 setData(result);
             } catch (error) {
                 console.error("Error fetching journey data:", error);
@@ -63,9 +64,9 @@ function JourneyTable() {
         { title: "Created By", id: "createdBy" },
         { title: "Created Time", id: "createdTime" },
         { title: "Updated By", id: "updatedBy" },
-        { title: "Last Updated Time", id: "updatedTime" },
-        { title: "View", id: "view" },
-        { title: "Edit", id: "edit" }
+        { title: "Last Updated Time", id: "updatedTime" }
+        // { title: "View", id: "view" },
+        // { title: "Edit", id: "edit" }
     ];
 
     const getCellContent = useCallback((cell: [number, number]): GridCell => {
@@ -93,20 +94,20 @@ function JourneyTable() {
             case "updatedTime":
                 cellData = new Date(dataRow.auditInfo.updatedTime).toLocaleString();
                 break;
-            case "view":
-                return {
-                    kind: GridCellKind.Custom,
-                    allowOverlay: true,
-                    copyData: "View",
-                    data: { kind: "button-cell", label: "View", onClick: () => navigateToJourneyFlow(dataRow.journeyId) },
-                };
-            case "edit":
-                return {
-                    kind: GridCellKind.Custom,
-                    allowOverlay: true,
-                    copyData: "Edit",
-                    data: { kind: "button-cell", label: "Edit", onClick: () => navigateToJourneyFlowEditor(dataRow.journeyId) },
-                };
+            // case "view":
+            //     return {
+            //         kind: GridCellKind.Custom,
+            //         allowOverlay: true,
+            //         copyData: "View",
+            //         data: { kind: "button-cell", label: "View", onClick: () => navigateToJourneyFlow(dataRow.journeyId) },
+            //     };
+            // case "edit":
+            //     return {
+            //         kind: GridCellKind.Custom,
+            //         allowOverlay: true,
+            //         copyData: "Edit",
+            //         data: { kind: "button-cell", label: "Edit", onClick: () => navigateToJourneyFlowEditor(dataRow.journeyId) },
+            //     };
             default:
                 // cellData = "";
         }
@@ -125,11 +126,11 @@ function JourneyTable() {
         const columnId = columns[col].id;
         const dataRow = data[row];
 
-        if (columnId === "view") {
+        // if (columnId === "view") {
             navigateToJourneyFlow(dataRow.journeyId);
-        } else if (columnId === "edit") {
-            navigateToJourneyFlowEditor(dataRow.journeyId);
-        }
+        // } else if (columnId === "edit") {
+            // navigateToJourneyFlowEditor(dataRow.journeyId);
+        // }
     }, [columns, data, navigateToJourneyFlow, navigateToJourneyFlowEditor]);
 
     return (
@@ -148,6 +149,7 @@ function JourneyTable() {
                         className="custom-data-editor h-full w-full"
                         headerHeight={40}
                         rowHeight={40}
+                        rowMarkers="checkbox-visible"
                         onCellClicked={onCellClicked}
                         theme={{
                             accentColor :"#ffffff",

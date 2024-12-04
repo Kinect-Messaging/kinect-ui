@@ -259,6 +259,7 @@ import "@glideapps/glide-data-grid/dist/index.css";
 import React, { useState, useEffect, useCallback } from "react";
 import { DataEditor, GridColumn, GridCell, GridCellKind } from "@glideapps/glide-data-grid";
 import Card from 'components/card';
+import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 type ChangeLog = {
@@ -287,13 +288,13 @@ function EnvTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/env', {
+                const response = await axios.get('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/env', {
                     headers: {
                         'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
                         'X-Transaction-Id': uuidv4()
                     }
                 });
-                const result: EnvData[] = await response.json();
+                const result: EnvData[] = response.data;
                 setData(result);
                 console.log(result);
             } catch (error) {
@@ -361,25 +362,26 @@ function EnvTable() {
         };
 
         try {
-            const response = await fetch('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/env', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
-                    'X-Transaction-Id': uuidv4()
-                },
-                body: JSON.stringify(newEnvData),
-            });
+            const response = await axios.post('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/env',
+                newEnvData, 
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY,
+                        'X-Transaction-Id': uuidv4()
+                    }
+                }
+            );
 
-            if (response.ok) {
-                const result = await response.json();
+            if (response.status === 200 || response.status === 201) {
+                const result = response.data;
                 setData([...data, result]); // Add the new environment to the data table
                 closeAddModal();
             } else {
                 console.error('Failed to add new environment');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error adding new environment:', error);
         }
     };
 
