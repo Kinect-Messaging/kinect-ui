@@ -6,6 +6,7 @@ import Card from 'components/card';
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation'
+import { utils, read, writeFileXLSX, WorkBook } from 'xlsx'
 import { background } from "@chakra-ui/system";
 
 type JourneyStep = {
@@ -29,13 +30,15 @@ type JourneyData = {
 
 function JourneyTable() {
     const [data, setData] = useState<JourneyData[]>([]);
+    const [csvData, setCsvData] = useState<JourneyData[]>([])
     const router = useRouter();
 
     // Fetch data from the API
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const response = await axios.get('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
+            try { 
+                // const response = await axios.get('https://dev.kinectmessaging.com/config/v1/kinect/messaging/config/journey', {
+                const response = await axios.get('http://127.0.0.1:3658/m1/751759-728861-fff5b274/{1}', {
                     headers: {
                         'Ocp-Apim-Subscription-Key': process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY || '',
                         'X-Transaction-Id': uuidv4()
@@ -123,15 +126,56 @@ function JourneyTable() {
 
     const onCellClicked = useCallback((cell: [number, number], event: any) => {
         const [col, row] = cell;
-        const columnId = columns[col].id;
+        // const columnId = columns[col].id;
         const dataRow = data[row];
 
         // if (columnId === "view") {
+        if(col === -1){
+            //rows selection for export
+            setCsvData((prevData) => {
+                // Check if an item with the same id already exists
+                const exists = prevData.some((item) => item.journeyId === dataRow.journeyId);
+                if (exists) {
+                    return prevData; // Return the existing array if id is the same
+                }
+                return [...prevData, dataRow]; // Add new item if id is unique
+            });
+            
+            console.log(csvData)
+        }else{
             navigateToJourneyFlow(dataRow.journeyId);
+        }
+            
         // } else if (columnId === "edit") {
             // navigateToJourneyFlowEditor(dataRow.journeyId);
         // }
     }, [columns, data, navigateToJourneyFlow, navigateToJourneyFlowEditor]);
+
+    const flatten = (obj, path = '') => {        
+        if (!(obj instanceof Object)) return {[path.replace(/\.$/g, '')]:obj};
+    
+        return Object.keys(obj).reduce((output, key) => {
+            return obj instanceof Array ? 
+                 {...output, ...flatten(obj[key], path +  '[' + key + '].')}:
+                 {...output, ...flatten(obj[key], path + key + '.')};
+        }, {});
+    }
+
+    // export data
+    const exportXLSX = () => {
+        let dataToExport = flatten(csvData)
+        console.log('csvdata ',JSON.stringify(csvData))
+        console.log('datatoexport ',JSON.stringify(dataToExport))
+        // generate worksheet using data with the order specified in the columns array
+        const ws = utils.json_to_sheet(dataToExport, {header: columns.map(c => c.id ?? c.title)});
+        // rewrite header row with titles
+        utils.sheet_add_aoa(ws, [columns.map(c => c.title ?? c.id)], {origin: "A1"});
+        // create workbook
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, "Export"); // replace with sheet name
+        // download file
+        writeFileXLSX(wb, "Journey-Data.xlsx");
+    };
 
     return (
         <div>
@@ -139,6 +183,7 @@ function JourneyTable() {
                 <header className="relative flex items-center justify-between pt-4">
                     <div className="text-xl font-bold text-navy-700 dark:text-white">Journeys Data Grid</div>
                     <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => navigateToJourneyFlowEditor('')}>Add Journey</button>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => exportXLSX()}>Export to CSV</button>
                 </header>
 
                 <div className="mt-8 h-full w-full">
